@@ -1,0 +1,16 @@
+.chat-container {
+  width: 80%;
+  max-width: 800px;
+  margin: 20px auto;
+  background-color: gray;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+}
+.chat-messages {
+  /* 채팅 메시지 영역 스타일 */
+  flex: 1;
+  padding-left: 100px;
+}

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="./main.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<div class="chat-container" draggable="false">
+    <div class="chat-messages">
+        <p>채팅창</p>
+        <p>채팅창</p>
+        <p>채팅창</p>
+        <p>채팅창</p>
+        <p>채팅창</p>
+        <p>채팅창</p>
+        <p>채팅창</p>
+        <p>채팅창</p>
+        <p>채팅창</p>
+        <p>채팅창</p>
+        <p>채팅창</p>
+
+    </div>
+
+    <script>
+        let 눌렀나 = false;
+        let 시작좌표 = 0;
+        let 변화량 = 0;
+        let 투명도 = 0;
+
+        const chatMessages = document.querySelector(".chat-messages");
+        const 컨테이너 = $('.chat-container')
+        // 드래그 핸들링 이벤트 설정
+        chatMessages.addEventListener("mousedown", function (event) {
+            눌렀나 = true;
+            시작좌표 = event.clientX;
+            // console.log(시작좌표)
+        });
+
+        chatMessages.addEventListener("mousemove", function (event) {
+
+            if (눌렀나) {
+                컨테이너.css('transition', 'none')
+                변화량 = 시작좌표 - event.clientX;
+
+                if (변화량 < 300 && 변화량 > -300) {
+                    투명도 = -(1 / 180000) * 변화량 * 변화량 + 1;
+                    console.log(투명도);
+                    // console.log(변화량)
+                    컨테이너.css('transform', `translateX(${-변화량}px)`)
+                        .css('opacity', 투명도);
+                }
+            }
+        });
+
+        chatMessages.addEventListener("mouseup", function (event) {
+            if (눌렀나) {
+                // 변화량 = 시작좌표 - event.clientX;
+                // console.log(변화량)
+
+                if (변화량 > 200) {
+                    console.log('오른쪽으로 이동')
+                    alert('오른쪽 이동')
+                    redirectToNextRoom();
+                } else if (변화량 < -200) {
+                    console.log('왼쪽으로 이동')
+                    alert('왼쪽 이동')
+                    redirectToPreviousRoom();
+                } else {
+                    console.log('별로 이동안함')
+                    컨테이너.css('transform', `translateX(0px)`).css('transition', 'all 0.5s')
+                }
+
+                눌렀나 = false;
+                시작좌표 = 0;
+                변화량 = 0;
+            }
+        });
+
+
+        function redirectToPreviousRoom() {
+            const currentRoom = window.location.pathname.substring(1);
+            const previousRoom = parseInt(currentRoom) - 1;
+            // alert("이전페이지 이동")
+            window.location.href = `/${previousRoom}`;
+        }
+
+        function redirectToNextRoom() {
+            const currentRoom = window.location.pathname.substring(1);
+            const nextRoom = parseInt(currentRoom) + 1;
+            // alert("다음페이지 이동")
+            window.location.href = `/${nextRoom}`;
+        }
+    </script>
+</div>
+
+<body>
+
+</body>
+
+</html>
