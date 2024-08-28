@@ -2,15 +2,55 @@
   width: 80%;
   max-width: 800px;
   margin: 20px auto;
-  background-color: gray;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  background-color: skyblue;
   height: 80vh;
+  overflow: auto; /* 스크롤이 필요할 때만 표시 */
 }
-.chat-messages {
-  /* 채팅 메시지 영역 스타일 */
-  flex: 1;
-  padding-left: 100px;
+.other-messages {
+  text-align: left;
+  margin-left: 1%;
+  margin-top: 2%;
+  max-width: 60%; /* 최대 너비를 설정할 수 있습니다 */
+  word-wrap: break-word; /* 긴 단어가 있을 때 줄바꿈을 강제합니다 */
+  float: left;
+  background-color: white;
+  padding: 1%;
+  border-radius: 10px;
+}
+.my-messages {
+  text-align: right;
+  margin-right: 1%;
+  margin-top: 2%;
+  max-width: 60%; /* 최대 너비를 설정할 수 있습니다 */
+  word-wrap: break-word; /* 긴 단어가 있을 때 줄바꿈을 강제합니다 */
+  float: right;
+  background-color: yellow;
+  padding: 1%;
+  border-radius: 10px;
+}
+
+.other-profile-image {
+  float: left;
+  background-color: white;
+  margin-top: 2%;
+  margin-left: 1%;
+  padding: 1%;
+  border-radius: 10px;
+}
+
+.my-profile-image {
+  float: right;
+  background-color: white;
+  margin-top: 2%;
+  margin-right: 1%;
+  padding: 1%;
+  border-radius: 10px;
+}
+
+.input-messages {
+  border: 1px solid red;
+  text-align: center;
+  width: 80%;
+  max-width: 800px;
+  margin: 20px auto;
 }
