@@ -29,34 +29,73 @@ app.use(express.urlencoded({ extended: true }))
 
 
 app.get('/', (요청, 응답) => {
-    응답.render('chatRoom.ejs', { 아이디: '안녕' })
-    // 응답.redirect('/chat/1')
+    응답.sendFile(__dirname + '/index.html')
+})
+app.post('/list', async (요청, 응답) => {
+
+    let myRoom = await db.collection('chatroom').findOne({ creatUserID: 요청.body.id })
+    if ((myRoom)) {
+        console.log('존재함')
+    } else {
+        await db.collection('user').insertOne({
+            id: 요청.body.id
+        })
+
+        await db.collection('chatroom').insertOne({
+            creatUserID: 요청.body.id,
+            userID: [요청.body.id],
+            userNum: 1,
+            date: new Date()
+        })
+        console.log('새로만들었음')
+    }
+
+    let chatroom = await db.collection('chatroom').find().toArray()
+    응답.render('chatList.ejs', { userID: 요청.body.id, room: chatroom })
 })
 
-// app.get('/chat/:rooms', (요청, 응답) => {
-//     let room = 요청.params.rooms
-//     room += 1
-//     응답.sendFile(__dirname + '/index.html')
-// })
+app.post('/room', async (요청, 응답) => {
+    let currentRoom = await db.collection('chatroom')
+        .findOne({ creatUserID: 요청.body.creatUserID })
+    if (currentRoom.userID.includes(요청.body.userID)) {
+    } else {
+        let user = currentRoom.userID
+        user.push(요청.body.userID)
+        await db.collection('chatroom').updateOne(
+            { _id: currentRoom._id },
+            { $set: { userID: user }, $inc: { userNum: 1 } }
+        )
+        currentRoom = await db.collection('chatroom')
+            .findOne({ userID: 요청.body.userID })
+    }
+    roomName = JSON.parse(JSON.stringify(currentRoom._id))
+    let messages = await db.collection(roomName).find().toArray()
 
-app.get('/news', (요청, 응답) => {
-    db.collection('chat').insertOne({ title: '어쩌구' })
-    응답.send('데이터~~~')
+    응답.render('chatRoom.ejs', {
+        creatUserID: currentRoom.creatUserID,
+        room: currentRoom,
+        userID: 요청.body.userID,
+        chat: messages
+    })
+
 })
 
-app.get('/chat', (요청, 응답) => {
-    응답.render('chatRoom.ejs', { result: "안녕" })
-})
-
-app.post('/chat', (요청, 응답) => {
-    응답.render('chatRoom.ejs', { 아이디: 요청.body.id })
-})
 
 io.on('connection', (socket) => {
 
-    socket.on('name', (data) => {
-        console.log('유저가 보낸거 : ', data)
+    socket.on('ask-join', (roomID) => {
+        socket.join(roomID)
+        room = io.sockets.adapter.rooms.get(roomID);
+        io.emit('room-size', room.size)
     })
-    io.emit('age', '20')
+
+    socket.on('message', async (data) => {
+        await db.collection(data.roomID).insertOne({
+            writer: data.user,
+            message: data.msg,
+            time: new Date()
+        })
+        io.to(data.roomID).emit('msg', { message: data.msg, user: data.user });
+    })
 
 }) 

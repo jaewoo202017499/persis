@@ -5,72 +5,103 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link href="./main.css" rel="stylesheet">
+    <link href="/main.css" rel="stylesheet">
 
 </head>
 
 <body>
-    <div class="chat-container" draggable="false">
-        <div class="other-profile-image">
-            <%= 아이디 %>
-        </div>
-        <div class="other-messages">
-            <span>상대방</span>
-        </div>
-        <div style="clear: both;"></div>
+    <%=room._id %>
+        <div class="chat-container" draggable="false">
+            <h4>
+                <%=userID %>
+            </h4>
 
-        <div class="other-profile-image">
-            <%= 아이디 %>
-        </div>
-        <div class="other-messages">
-            <span>상대방</span>
-        </div>
-        <div style="clear: both;"></div>
+            <% for(let i=0; i < chat.length; i++){%>
+                <% if(chat[i].writer==userID){ %>
+                    <div class="my-profile-image">
+                        <%= chat[i].writer %>
+                    </div>
+                    <div class="my-messages">
+                        <%= chat[i].message%>
+                    </div>
+                    <div style="clear: both;"></div>
+                    <%}else{%>
+                        <div class="other-profile-image">
+                            <%= chat[i].writer %>
+                        </div>
+                        <div class="other-messages">
+                            <span>
+                                <%= chat[i].message %>
+                            </span>
+                        </div>
+                        <div style="clear: both;"></div>
+                        <%}}%>
 
-        <div class="my-profile-image">
-            <%= 아이디 %>
         </div>
-        <div class="my-messages">
-            내꺼dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+        <div class="input-messages">
+            <input class="chat-input" name="chat" placeholder="채팅">
+            <button class="send-btn">전송</button>
+            <button>다음</button>
         </div>
-        <div style="clear: both;"></div>
 
-        <div class="other-profile-image">
-            <%= 아이디 %>
-        </div>
-        <div class="other-messages">
-            <span>
-                상대방기qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq77777777777777777777777777777777777777777777
-            </span>
-        </div>
-        <div style="clear: both;"></div>
-    </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+            integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-    <div class="input-messages">
-        <form action="/chat" method="POST">
-            <input name="chat" placeholder="채팅">
-            <input name="id" placeholder="아이디">
-            <button type="submit">버튼</button>
-        </form>
-    </div>
+        <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
+        <script>
+            const socket = io() // 유저 웹소켓 연결
+            socket.emit('ask-join', '<%= room._id %>')
+            socket.on('room-size', (roomSize) => {
+                console.log('인원수: ', roomSize)
+            })
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
-        integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            // 메시지 보내기
+            $('.send-btn').on('click', () => {
+                let msg = $('.chat-input').val()
+                $('.chat-input').val('')
+                socket.emit('message', { msg: msg, roomID: '<%=room._id %>', user: '<%=userID%>' })
+            })
 
-    <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
-    <script>
-        const socket = io() // 유저 웹소켓 연결
-        socket.emit('name', 'jaewoo')
-        socket.on('age', (data) => {
-            console.log(data)
-        })
-            (server.js)
+            document.querySelector('.chat-input').addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    let msg = $('.chat-input').val()
+                    $('.chat-input').val('')
+                    socket.emit('message', { msg: msg, roomID: '<%=room._id %>', user: '<%=userID%>' })
+                }
+            })
+            // 메시지 받기
+            socket.on('msg', (msg) => {
+                let 템플릿
+                if (msg.user == '<%=userID%>') {
+                    console.log('내꺼')
+                    템플릿 = `
+                        <div class="my-profile-image">
+                            ${msg.user}
+                        </div>
+                        <div class="my-messages">
+                            <span>${msg.message}</span>
+                        </div>
+                        <div style="clear: both;"></div>`;
+                } else {
+                    console.log('남의꺼')
+                    템플릿 = `
+                        <div class="other-profile-image">
+                            ${msg.user}
+                        </div>
+                        <div class="other-messages">
+                            <span>${msg.message}</span>
+                        </div>
+                        <div style="clear: both;"></div>`;
+                }
 
-        socket.on('message', async (data) => {
-            io.to(data.room).emit('작명', data.msg);
-        })
-    </script>
+                let chatContainer = document.querySelector('.chat-container');
+                chatContainer.insertAdjacentHTML('beforeend', 템플릿)
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            })
+
+        </script>
 </body>
 
 </html>
