@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="./main.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <div class="chat-container" draggable="false">
+        <div class="other-profile-image">
+            <%= 아이디 %>
+        </div>
+        <div class="other-messages">
+            <span>상대방</span>
+        </div>
+        <div style="clear: both;"></div>
+
+        <div class="other-profile-image">
+            <%= 아이디 %>
+        </div>
+        <div class="other-messages">
+            <span>상대방</span>
+        </div>
+        <div style="clear: both;"></div>
+
+        <div class="my-profile-image">
+            <%= 아이디 %>
+        </div>
+        <div class="my-messages">
+            내꺼dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+        </div>
+        <div style="clear: both;"></div>
+
+        <div class="other-profile-image">
+            <%= 아이디 %>
+        </div>
+        <div class="other-messages">
+            <span>
+                상대방기qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq77777777777777777777777777777777777777777777
+            </span>
+        </div>
+        <div style="clear: both;"></div>
+    </div>
+
+    <div class="input-messages">
+        <form action="/chat" method="POST">
+            <input name="chat" placeholder="채팅">
+            <input name="id" placeholder="아이디">
+            <button type="submit">버튼</button>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
+    <script>
+        const socket = io() // 유저 웹소켓 연결
+        socket.emit('name', 'jaewoo')
+        socket.on('age', (data) => {
+            console.log(data)
+        })
+            (server.js)
+
+        socket.on('message', async (data) => {
+            io.to(data.room).emit('작명', data.msg);
+        })
+    </script>
+</body>
+
+</html>
