@@ -1,11 +1,12 @@
 const express = require('express')
 const app = express()
 
-const { MongoClient } = require('mongodb')
+const { MongoClient, ObjectId } = require('mongodb')
 require('dotenv').config()
 
 const { createServer } = require('http')
 const { Server } = require('socket.io')
+const { object } = require('firebase-functions/v1/storage')
 const server = createServer(app)
 const io = new Server(server)
 
@@ -31,6 +32,7 @@ app.use(express.urlencoded({ extended: true }))
 app.get('/', (요청, 응답) => {
     응답.sendFile(__dirname + '/index.html')
 })
+
 app.post('/list', async (요청, 응답) => {
 
     let myRoom = await db.collection('chatroom').findOne({ creatUserID: 요청.body.id })
@@ -47,7 +49,7 @@ app.post('/list', async (요청, 응답) => {
             userNum: 1,
             date: new Date()
         })
-        console.log('새로만들었음')
+        console.log('계정 새로 만들었음')
     }
 
     let chatroom = await db.collection('chatroom').find().toArray()
@@ -63,6 +65,44 @@ app.post('/room', async (요청, 응답) => {
         user.push(요청.body.userID)
         await db.collection('chatroom').updateOne(
             { _id: currentRoom._id },
+            {
+                $set: { userID: user },
+                $inc: { userNum: 1 }
+            }
+        )
+        currentRoom = await db.collection('chatroom')
+            .findOne({ userID: 요청.body.userID })
+    }
+    roomName = JSON.parse(JSON.stringify(currentRoom._id))
+    let messages = await db.collection(roomName).find().toArray()
+
+    응답.render('chatRoom.ejs', {
+        room: currentRoom,
+        userID: 요청.body.userID,
+        chat: messages
+    })
+
+})
+
+app.post('/room/:next', async (요청, 응답) => {
+    // const result = await db.collection('chatroom')
+    //     .find({ creatUserID: { $ne: 요청.body.creatUserID } }).toArray();
+    // let max = result.length - Number.EPSILON;
+    // let randomInt = Math.floor(Math.random() * (max));
+    // let currentRoom = result[randomInt]
+
+    let currentRoom = await db.collection('chatroom').aggregate([
+        { $match: { creatUserID: { $ne: 요청.body.creatUserID } } },
+        { $sample: { size: 1 } }  // 랜덤하게 하나 선택
+    ]).toArray()
+    currentRoom = currentRoom[0]
+
+    if (currentRoom.userID.includes(요청.body.userID)) {
+    } else {
+        let user = currentRoom.userID
+        user.push(요청.body.userID)
+        await db.collection('chatroom').updateOne(
+            { _id: currentRoom._id },
             { $set: { userID: user }, $inc: { userNum: 1 } }
         )
         currentRoom = await db.collection('chatroom')
@@ -72,14 +112,22 @@ app.post('/room', async (요청, 응답) => {
     let messages = await db.collection(roomName).find().toArray()
 
     응답.render('chatRoom.ejs', {
-        creatUserID: currentRoom.creatUserID,
         room: currentRoom,
         userID: 요청.body.userID,
         chat: messages
     })
-
 })
 
+app.post('/page-leave', async (요청, 응답) => {
+    db.collection('chatroom').updateOne(
+        { _id: new ObjectId(요청.body.roomID) },
+        {
+            $pull: { userID: 요청.body.userID },
+            $inc: { userNum: -1 }
+        }
+    );
+    응답.sendStatus(200); // 클라이언트에 응답
+});
 
 io.on('connection', (socket) => {
 

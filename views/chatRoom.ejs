@@ -10,7 +10,9 @@
 </head>
 
 <body>
-    <%=room._id %>
+    <%=room.creatUserID %>
+        <div class="header">
+        </div>
         <div class="chat-container" draggable="false">
             <h4>
                 <%=userID %>
@@ -42,7 +44,11 @@
         <div class="input-messages">
             <input class="chat-input" name="chat" placeholder="채팅">
             <button class="send-btn">전송</button>
-            <button>다음</button>
+            <form action="/room/random" method="POST">
+                <button type="submit" id="next-btn">다음</button>
+                <input type="hidden" name="creatUserID" value="<%=room.creatUserID%>">
+                <input type="hidden" name="userID" value="<%=userID %>">
+            </form>
         </div>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
@@ -51,6 +57,15 @@
 
         <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
         <script>
+
+
+            // 작성자 아이디
+            // 현재 유저아이디
+
+
+
+
+
             const socket = io() // 유저 웹소켓 연결
             socket.emit('ask-join', '<%= room._id %>')
             socket.on('room-size', (roomSize) => {
@@ -99,6 +114,28 @@
                 chatContainer.insertAdjacentHTML('beforeend', 템플릿)
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             })
+
+            socket.on('room-size', (data) => {
+                let 템플릿 = `${data}명`
+                document.querySelector('.header').innerHTML = 템플릿
+            })
+
+            // 페이지이동 감지
+            window.addEventListener('beforeunload', function (event) {
+                // 페이지를 떠날 때 서버로 이동 감지 요청을 보냄
+                fetch('/page-leave', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        message: 'User is leaving the page <%=userID %>',
+                        roomID: '<%=room._id%>',
+                        userID: '<%=userID%>'
+                    }),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                // 페이지 이동을 차단하려면 아래의 코드도 추가할 수 있음
+                // event.returnValue = 'Are you sure you want to leave?';
+            });
 
         </script>
 </body>
