@@ -145,7 +145,7 @@ io.on('connection', (socket) => {
         // DB저장
         await db.collection(data.roomID).insertOne({
             writer: data.user,
-            message: data.msg,
+            message: data.text,
             time: currentTime
         })
         io.to(data.roomID).emit('msg', { message: data.text, user: data.user });
