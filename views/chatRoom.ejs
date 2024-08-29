@@ -10,61 +10,63 @@
 </head>
 
 <body>
-    <%=room.creatUserID %>
-        <div class="header">
+    <div class="header">
+        <span>
+            <%=JSON.stringify(room)%>
+        </span>
+        <span>방주인 : <%=room.creatUserID %></span>
+        <div class="roomName">
+            너 : <%=userID %>
         </div>
-        <div class="chat-container" draggable="false">
-            <h4>
-                <%=userID %>
-            </h4>
-
+        <div class="peopleNum"></div>
+        <a href="/list?id=<%=userID%>"><button>리스트</button></a>
+    </div>
+    <div style="clear: both;"></div>
+    <div class="chat-container" draggable="false">
+        <%if(chat.length> 0){%>
             <% for(let i=0; i < chat.length; i++){%>
-                <% if(chat[i].writer==userID){ %>
-                    <div class="my-profile-image">
-                        <%= chat[i].writer %>
-                    </div>
-                    <div class="my-messages">
-                        <%= chat[i].message%>
-                    </div>
-                    <div style="clear: both;"></div>
-                    <%}else{%>
-                        <div class="other-profile-image">
-                            <%= chat[i].writer %>
+                <% if(chat[i].userID==userID){ %>
+                    <div class="chatMessage">
+                        <div class="my-profile-image">
+                            <%= chat[i].userID %>
                         </div>
-                        <div class="other-messages">
-                            <span>
-                                <%= chat[i].message %>
-                            </span>
+                        <div class="my-messages">
+                            <%= chat[i].text%>
                         </div>
                         <div style="clear: both;"></div>
-                        <%}}%>
-
-        </div>
-
-        <div class="input-messages">
-            <input class="chat-input" name="chat" placeholder="채팅">
-            <button class="send-btn">전송</button>
-            <form action="/room/random" method="POST">
-                <button type="submit" id="next-btn">다음</button>
-                <input type="hidden" name="creatUserID" value="<%=room.creatUserID%>">
-                <input type="hidden" name="userID" value="<%=userID %>">
-            </form>
-        </div>
-
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
-            integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-        <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
-        <script>
+                    </div>
+                    <%}else{%>
+                        <div class="chatMessage">
+                            <div class="other-profile-image">
+                                <%= chat[i].userID %>
+                            </div>
+                            <div class="other-messages">
+                                <%= chat[i].text %>
+                            </div>
+                            <div style="clear: both;"></div>
+                        </div>
+                        <%}}}%>
 
 
-            // 작성자 아이디
-            // 현재 유저아이디
+    </div>
 
+    <div class="input-messages">
+        <input class="chat-input" name="chat" placeholder="채팅">
+        <button class="send-btn">전송</button>
+        <form action="/room/random" method="POST">
+            <button type="submit" id="next-btn">다음</button>
+            <input type="hidden" name="creatUserID" value="<%=room.creatUserID%>">
+            <input type="hidden" name="userID" value="<%=userID %>">
+        </form>
+    </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-
+    <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
 
             const socket = io() // 유저 웹소켓 연결
             socket.emit('ask-join', '<%= room._id %>')
@@ -76,14 +78,23 @@
             $('.send-btn').on('click', () => {
                 let msg = $('.chat-input').val()
                 $('.chat-input').val('')
-                socket.emit('message', { msg: msg, roomID: '<%=room._id %>', user: '<%=userID%>' })
+                socket.emit('message', {
+                    text: msg,
+                    user: '<%=userID%>',
+                    roomID: '<%=room._id %>',
+                    room: '<%=room.creatUserID%>%> '
+                })
             })
 
             document.querySelector('.chat-input').addEventListener('keydown', function (event) {
                 if (event.key === 'Enter') {
                     let msg = $('.chat-input').val()
                     $('.chat-input').val('')
-                    socket.emit('message', { msg: msg, roomID: '<%=room._id %>', user: '<%=userID%>' })
+                    socket.emit('message', {
+                        text: msg,
+                        user: '<%=userID%>',
+                        roomID: '<%=room._id %>',
+                    })
                 }
             })
             // 메시지 받기
@@ -92,52 +103,62 @@
                 if (msg.user == '<%=userID%>') {
                     console.log('내꺼')
                     템플릿 = `
+                    <div class="chatMessage">
                         <div class="my-profile-image">
                             ${msg.user}
                         </div>
                         <div class="my-messages">
                             <span>${msg.message}</span>
                         </div>
-                        <div style="clear: both;"></div>`;
+                        <div style="clear: both;"></div>
+                    </div>`;
                 } else {
                     console.log('남의꺼')
                     템플릿 = `
+                    <div class="chatMessage">
                         <div class="other-profile-image">
                             ${msg.user}
                         </div>
                         <div class="other-messages">
                             <span>${msg.message}</span>
-                        </div>
-                        <div style="clear: both;"></div>`;
+                        </div> 
+                        <div style="clear: both;"></div>
+                    </div>`;
                 }
                 let chatContainer = document.querySelector('.chat-container');
                 chatContainer.insertAdjacentHTML('beforeend', 템플릿)
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             })
 
+            socket.on('delete-message', (data) => {
+                console.log(data)
+                document.querySelectorAll('.chatMessage')[0].remove()
+                if (data.user == '<%=userID%>') {
+                    console.log('내꺼 삭제')
+                } else {
+                    console.log('너꺼 삭제')
+                }
+            })
+
             socket.on('room-size', (data) => {
-                let 템플릿 = `${data}명`
-                document.querySelector('.header').innerHTML = 템플릿
+                let 템플릿 = `접속자${data}명`
+                document.querySelector('.peopleNum').innerHTML = 템플릿
             })
 
             // 페이지이동 감지
             window.addEventListener('beforeunload', function (event) {
+                socket.emit('leave-page', '<%= room._id %>')
                 // 페이지를 떠날 때 서버로 이동 감지 요청을 보냄
-                fetch('/page-leave', {
+                fetch('/page-leave?roomID=<%=room._id%>&userID=<%=userID%>', {
                     method: 'POST',
-                    body: JSON.stringify({
-                        message: 'User is leaving the page <%=userID %>',
-                        roomID: '<%=room._id%>',
-                        userID: '<%=userID%>'
-                    }),
                     headers: { 'Content-Type': 'application/json' }
                 });
 
                 // 페이지 이동을 차단하려면 아래의 코드도 추가할 수 있음
                 // event.returnValue = 'Are you sure you want to leave?';
             });
-
-        </script>
+        });
+    </script>
 </body>
 
 </html>
