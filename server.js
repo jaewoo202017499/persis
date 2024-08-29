@@ -109,7 +109,6 @@ app.post('/room/:next', async (요청, 응답) => {
     if (!preMessage) {
         preMessage = []
     }
-
     응답.render('chatRoom.ejs', {
         room: currentRoom,
         userID: 요청.body.userID,

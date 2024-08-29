@@ -45,13 +45,16 @@
     <div class="input-messages">
         <input class="chat-input" name="chat" placeholder="메시지를 입력하세요...">
         <button class="send-btn">전송</button>
-        <form action="/room/random" method="POST" style="display: inline;">
-            <button type="submit" id="next-btn">다음</button>
+
+        <!-- 랜덤페이지 이동 -->
+        <form id="next-form" action="/room/random" method="POST" style="display: inline;">
             <input type="hidden" name="creatUserID" value="<%=room.creatUserID%>">
             <input type="hidden" name="userID" value="<%=userID %>">
         </form>
     </div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -142,10 +145,69 @@
                     headers: { 'Content-Type': 'application/json' }
                 });
 
-                // 페이지 이동을 차단하려면 아래의 코드도 추가할 수 있음
-                // event.returnValue = 'Are you sure you want to leave?';
             });
+
+
+            let 눌렀나 = false;
+            let 시작좌표 = 0;
+            let 변화량 = 0;
+            let 투명도 = 0;
+
+            const chatMessages = document.querySelector(".chat-messages");
+            const 컨테이너 = $('.chat-container')
+            // 드래그 핸들링 이벤트 설정
+            컨테이너.on("mousedown", function (event) {
+                눌렀나 = true;
+                시작좌표 = event.clientX;
+                // console.log(시작좌표)
+            });
+
+            컨테이너.on("mousemove", function (event) {
+
+                if (눌렀나) {
+                    컨테이너.css('transition', 'none')
+                    변화량 = 시작좌표 - event.clientX;
+
+                    if (변화량 < 300 && 변화량 > -300) {
+                        투명도 = -(1 / 180000) * 변화량 * 변화량 + 1;
+                        console.log(투명도);
+                        // console.log(변화량)
+                        컨테이너.css('transform', `translateX(${-변화량}px)`)
+                            .css('opacity', 투명도);
+                    }
+                }
+            });
+
+            컨테이너.on("mouseup", function (event) {
+                if (눌렀나) {
+                    // 변화량 = 시작좌표 - event.clientX;
+                    // console.log(변화량)
+
+                    if (변화량 > 200) {
+                        console.log('오른쪽으로 이동')
+                        alert('오른쪽 이동')
+                        moveRoom();
+                    } else if (변화량 < -200) {
+                        console.log('왼쪽으로 이동')
+                        alert('왼쪽 이동')
+                        moveRoom();
+                    } else {
+                        console.log('별로 이동안함')
+                        컨테이너.css('transform', `translateX(0px)`).css('transition', 'all 0.5s')
+                    }
+
+                    눌렀나 = false;
+                    시작좌표 = 0;
+                    변화량 = 0;
+                }
+            });
+
+            function moveRoom() {
+                console.log('이동')
+                document.getElementById('next-form').submit();
+            }
         });
+
     </script>
 </body>
 
