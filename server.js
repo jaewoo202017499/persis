@@ -12,7 +12,7 @@ const io = new Server(server)
 
 let db
 let chatMessage = {}
-let deleteTime = 500
+let deleteTime = 30
 const url = process.env.DB_URL
 new MongoClient(url).connect().then((client) => {
     console.log('DB연결성공')
