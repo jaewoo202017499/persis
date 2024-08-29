@@ -206,6 +206,52 @@
                 console.log('이동')
                 document.getElementById('next-form').submit();
             }
+
+            // 모바일
+            컨테이너.on("touchstart", function (e) {
+                눌렀나 = true;
+                시작좌표 = e.touches[0].clientX;
+            });
+
+            컨테이너.on("touchmove", function (e) {
+
+                if (눌렀나) {
+                    컨테이너.css('transition', 'none')
+                    변화량 = 시작좌표 - e.touches[0].clientX;
+
+                    if (변화량 < 300 && 변화량 > -300) {
+                        투명도 = -(1 / 180000) * 변화량 * 변화량 + 1;
+                        console.log(투명도);
+                        // console.log(변화량)
+                        컨테이너.css('transform', `translateX(${-변화량}px)`)
+                            .css('opacity', 투명도);
+                    }
+                }
+            });
+
+            컨테이너.on("touchend", function (e) {
+                if (눌렀나) {
+                    // 변화량 = 시작좌표 - event.clientX;
+                    // console.log(변화량)
+
+                    if (변화량 > 200) {
+                        console.log('오른쪽으로 이동')
+                        alert('오른쪽 이동')
+                        moveRoom();
+                    } else if (변화량 < -200) {
+                        console.log('왼쪽으로 이동')
+                        alert('왼쪽 이동')
+                        moveRoom();
+                    } else {
+                        console.log('별로 이동안함')
+                        컨테이너.css('transform', `translateX(0px)`).css('transition', 'all 0.5s')
+                    }
+
+                    눌렀나 = false;
+                    시작좌표 = 0;
+                    변화량 = 0;
+                }
+            });
         });
 
     </script>
