@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채팅방 리스트</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/stylee.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="chat-room-list">
+            <h1 class="text-center mb-4">채팅방 리스트</h1>
+            <p class="text-muted">현재 사용자: <%= userID %>
+            </p>
+
+            <div class="list-group">
+                <% for(let i=0; i < room.length; i++) { %>
+                    <div class="chat-room-item">
+                        <form action="/room" method="POST">
+                            <input type="hidden" name="creatUserID" value="<%= room[i].creatUserID %>">
+                            <input type="hidden" name="userID" value="<%= userID %>">
+                            <button type="submit" class="chat-room-button">
+                                <%= room[i].creatUserID %>
+                            </button>
+                        </form>
+                    </div>
+                    <% } %>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

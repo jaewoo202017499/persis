@@ -5,22 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link href="./main.css" rel="stylesheet">
-
+    <link href="/main.css" rel="stylesheet">
 </head>
 
 <body>
-    <div class="chat-container" draggable="false">
-        <div class="chat-messages">
-            <p>채팅창</p>
+    <h1>로그인</h1>
+    <form action="/list" method="post">
+        <input type="text" name="id" placeholder="유저아이디">
+        <button type="submit">로그인</button>
+    </form>
 
-        </div>
 
-
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
-            integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <!-- <script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- <script>
         let 눌렀나 = false;
         let 시작좌표 = 0;
         let 변화량 = 0;
@@ -88,7 +87,6 @@
             window.location.href = `/chat/${nextRoom}`;
         }
     </script> -->
-    </div>
 </body>
 
 </html>
