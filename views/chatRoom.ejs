@@ -1,41 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>채팅방</title>
     <link href="/main.css" rel="stylesheet">
 
 </head>
 
 <body>
     <div class="header">
-        <span>
-            <%=JSON.stringify(room)%>
-        </span>
-        <span>방주인 : <%=room.creatUserID %></span>
-        <div class="roomName">
-            너 : <%=userID %>
+        <span>방주인: <%=room.creatUserID %></span>
+        <div class="roomName">너: <%=userID %>
         </div>
         <div class="peopleNum"></div>
         <a href="/list?id=<%=userID%>"><button>리스트</button></a>
     </div>
-    <div style="clear: both;"></div>
-    <div class="chat-container" draggable="false">
+
+    <div class="chat-container">
         <%if(chat.length> 0){%>
             <% for(let i=0; i < chat.length; i++){%>
                 <% if(chat[i].userID==userID){ %>
                     <div class="chatMessage">
-                        <div class="my-profile-image">
+                        <div class="my-profile-image ">
                             <%= chat[i].userID %>
                         </div>
                         <div class="my-messages">
                             <%= chat[i].text%>
                         </div>
-                        <div style="clear: both;"></div>
                     </div>
-                    <%}else{%>
+                    <%} else {%>
                         <div class="chatMessage">
                             <div class="other-profile-image">
                                 <%= chat[i].userID %>
@@ -43,26 +38,19 @@
                             <div class="other-messages">
                                 <%= chat[i].text %>
                             </div>
-                            <div style="clear: both;"></div>
                         </div>
                         <%}}}%>
-
-
     </div>
 
     <div class="input-messages">
-        <input class="chat-input" name="chat" placeholder="채팅">
+        <input class="chat-input" name="chat" placeholder="메시지를 입력하세요...">
         <button class="send-btn">전송</button>
-        <form action="/room/random" method="POST">
+        <form action="/room/random" method="POST" style="display: inline;">
             <button type="submit" id="next-btn">다음</button>
             <input type="hidden" name="creatUserID" value="<%=room.creatUserID%>">
             <input type="hidden" name="userID" value="<%=userID %>">
         </form>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
-        integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
     <script>
@@ -75,9 +63,9 @@
             })
 
             // 메시지 보내기
-            $('.send-btn').on('click', () => {
-                let msg = $('.chat-input').val()
-                $('.chat-input').val('')
+            document.querySelector('.send-btn').addEventListener('click', () => {
+                let msg = document.querySelector('.chat-input').value
+                document.querySelector('.chat-input').value = ''
                 socket.emit('message', {
                     text: msg,
                     user: '<%=userID%>',
@@ -88,8 +76,8 @@
 
             document.querySelector('.chat-input').addEventListener('keydown', function (event) {
                 if (event.key === 'Enter') {
-                    let msg = $('.chat-input').val()
-                    $('.chat-input').val('')
+                    let msg = document.querySelector('.chat-input').value
+                    document.querySelector('.chat-input').value = ''
                     socket.emit('message', {
                         text: msg,
                         user: '<%=userID%>',

@@ -6,13 +6,13 @@ require('dotenv').config()
 
 const { createServer } = require('http')
 const { Server } = require('socket.io')
-const { object } = require('firebase-functions/v1/storage')
 const server = createServer(app)
 const io = new Server(server)
 
+
 let db
 let chatMessage = {}
-let deleteTime = 5
+let deleteTime = 500
 const url = process.env.DB_URL
 new MongoClient(url).connect().then((client) => {
     console.log('DB연결성공')
@@ -24,7 +24,6 @@ new MongoClient(url).connect().then((client) => {
     console.log(err)
 })
 
-// app.use(express.static(path.join(__dirname + '/public')))
 app.use(express.static('public'))
 app.set('view engine', 'ejs')
 app.use(express.json())
@@ -44,7 +43,6 @@ app.post('/list', async (요청, 응답) => {
     // 계정 새로 만든 경우 방 만들기
     let myRoom = await db.collection('chatroom').findOne({ creatUserID: 요청.body.id })
     if ((myRoom)) {
-        console.log('존재함')
     } else {
         await db.collection('user').insertOne({
             id: 요청.body.id
@@ -54,7 +52,6 @@ app.post('/list', async (요청, 응답) => {
             userID: [요청.body.id],
             date: new Date()
         })
-        console.log('계정 새로 만들었음')
     }
     // 전체 채팅방 공유하기
     let chatroom = await db.collection('chatroom').find().toArray()
@@ -90,11 +87,6 @@ app.post('/room', async (요청, 응답) => {
 })
 
 app.post('/room/:next', async (요청, 응답) => {
-    // const result = await db.collection('chatroom')
-    //     .find({ creatUserID: { $ne: 요청.body.creatUserID } }).toArray();
-    // let max = result.length - Number.EPSILON;
-    // let randomInt = Math.floor(Math.random() * (max));
-    // let currentRoom = result[randomInt]
 
     let currentRoom = await db.collection('chatroom').aggregate([
         { $match: { creatUserID: { $ne: 요청.body.creatUserID } } },
@@ -114,11 +106,14 @@ app.post('/room/:next', async (요청, 응답) => {
     // 이전 메시지 불러오기
     let roomID = currentRoom._id.toString()
     let preMessage = chatMessage[roomID]
+    if (!preMessage) {
+        preMessage = []
+    }
 
     응답.render('chatRoom.ejs', {
         room: currentRoom,
         userID: 요청.body.userID,
-        chat: preMessage ? preMessage : []
+        chat: preMessage
     })
 })
 
@@ -148,8 +143,6 @@ io.on('connection', (socket) => {
         let currentTime = new Date()
         let message = { userID: data.user, text: data.text, time: currentTime }
         chatMessage[data.roomID].push(message)
-        console.log(chatMessage[data.roomID])
-
         // DB저장
         await db.collection(data.roomID).insertOne({
             writer: data.user,
@@ -160,7 +153,6 @@ io.on('connection', (socket) => {
 
         // 채팅지우기
         setTimeout(async () => {
-            console.log(data.roomID)
             chatMessage[data.roomID].shift()
             // chatMessage[data.roomID].
             io.to(data.roomID).emit('delete-message', { message: data.text, user: data.user })
@@ -168,9 +160,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('leave-page', (roomID) => {
-        console.log(roomID)
         room = io.sockets.adapter.rooms.get(roomID);
-        console.log(room.size - 1)
         io.to(roomID).emit('room-size', room.size - 1)
     })
 
