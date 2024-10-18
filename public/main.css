@@ -10,12 +10,17 @@ body {
 
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  /* justify-content: space-between; */
+  /* align-items: center; */
   background-color: #3498db;
   color: white;
-  padding: 15px 20px;
+  /* padding: 15px 20px; */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  justify-content: center; /* 가로 가운데 정렬 */
+  align-items: center; /* 세로 가운데 정렬 */
+  gap: 10%; /* 요소 사이 간격 */
+  padding: 10px;
 }
 
 .header span,
@@ -138,4 +143,30 @@ body {
 
 #next-btn:hover {
   background-color: #c0392b;
+}
+
+#color-buttons {
+  /* 메시지 입력 컨테이너 내 색상 선택 버튼 영역 스타일 */
+  display: flex;
+  flex-wrap: wrap;
+  align-self: flex-start;
+  margin-top: 10px;
+  margin-left: 5px;
+}
+
+.color-button {
+  /* 색상 선택 버튼 스타일 */
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  transition: transform 0.2s ease-in-out;
+  border: 2px solid #ccc;
+}
+
+.color-button:hover {
+  transform: scale(1.2);
+  border: 2px solid #888;
 }

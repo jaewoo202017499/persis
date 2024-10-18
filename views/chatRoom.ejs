@@ -12,10 +12,15 @@
 <body>
     <div class="header">
         <span>방주인: <%=room.creatUserID %></span>
-        <div class="roomName">너: <%=userID %>
-        </div>
         <div class="peopleNum"></div>
+
         <a href="/list?id=<%=userID%>"><button>리스트</button></a>
+        <!-- 로그아웃 버튼 추가 -->
+        <div class="d-flex justify-content-end">
+            <form action="/logout" method="GET">
+                <button type="submit" class="btn btn-danger" style="background-color: #dc3545;">로그아웃</button>
+            </form>
+        </div>
     </div>
 
     <div class="chat-container">
@@ -41,59 +46,80 @@
                         </div>
                         <%}}}%>
     </div>
+    <% let
+        colors=['4CAF50','2196F3','FF9800','FF5722','9C27B0','607D8B','E91E63','00BCD4','FFC107','795548','8BC34A','FFFFFF']
+        %>
 
-    <div class="input-messages">
-        <input class="chat-input" name="chat" placeholder="메시지를 입력하세요...">
-        <button class="send-btn">전송</button>
+        <div id="color-buttons">
+            <!-- 색상 선택 버튼들 -->
+            <% for (let i=0; i < colors.length; i++) { %>
+                <div class="color-button" style="background-color: #<%= colors[i] %>;"
+                    onclick="changeBubbleColor('#<%= colors[i] %>')">
+                </div>
+                <% } %>
+                    <script>
+                        function changeBubbleColor(color) {
+                            currentBubbleColor = color;
+                            document.querySelector(".chat-container").style.backgroundColor = color;
+                        }
+                    </script>
 
-        <!-- 랜덤페이지 이동 -->
-        <form id="next-form" action="/room/random" method="POST" style="display: inline;">
-            <input type="hidden" name="creatUserID" value="<%=room.creatUserID%>">
-            <input type="hidden" name="userID" value="<%=userID %>">
-        </form>
-    </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
-        integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        </div>
+        <div class="input-messages">
+            <input class="chat-input" name="chat" placeholder="메시지를 입력하세요...">
+            <button class="send-btn">전송</button>
 
-            const socket = io() // 유저 웹소켓 연결
-            socket.emit('ask-join', '<%= room._id %>')
-            socket.on('room-size', (roomSize) => {
-                console.log('인원수: ', roomSize)
-            })
+            <!-- 랜덤페이지 이동 -->
+            <form id="next-form" action="/room/random" method="POST" style="display: inline;">
+                <input type="hidden" name="creatUserID" value="<%=room.creatUserID%>">
+                <input type="hidden" name="userID" value="<%=userID %>">
+            </form>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+            integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
+        <script>
 
-            // 메시지 보내기
-            document.querySelector('.send-btn').addEventListener('click', () => {
-                let msg = document.querySelector('.chat-input').value
-                document.querySelector('.chat-input').value = ''
-                socket.emit('message', {
-                    text: msg,
-                    user: '<%=userID%>',
-                    roomID: '<%=room._id %>',
-                    room: '<%=room.creatUserID%>%> '
+            document.addEventListener("DOMContentLoaded", function () {
+
+
+
+                const socket = io() // 유저 웹소켓 연결
+                socket.emit('ask-join', '<%= room._id %>')
+                socket.on('room-size', (roomSize) => {
+                    console.log('인원수: ', roomSize)
                 })
-            })
 
-            document.querySelector('.chat-input').addEventListener('keydown', function (event) {
-                if (event.key === 'Enter') {
+                // 메시지 보내기
+                document.querySelector('.send-btn').addEventListener('click', () => {
                     let msg = document.querySelector('.chat-input').value
                     document.querySelector('.chat-input').value = ''
                     socket.emit('message', {
                         text: msg,
                         user: '<%=userID%>',
                         roomID: '<%=room._id %>',
+                        room: '<%=room.creatUserID%>%> '
                     })
-                }
-            })
-            // 메시지 받기
-            socket.on('msg', (msg) => {
-                let 템플릿
-                if (msg.user == '<%=userID%>') {
-                    console.log('내꺼')
-                    템플릿 = `
+                })
+
+                document.querySelector('.chat-input').addEventListener('keydown', function (event) {
+                    if (event.key === 'Enter') {
+                        let msg = document.querySelector('.chat-input').value
+                        document.querySelector('.chat-input').value = ''
+                        socket.emit('message', {
+                            text: msg,
+                            user: '<%=userID%>',
+                            roomID: '<%=room._id %>',
+                        })
+                    }
+                })
+                // 메시지 받기
+                socket.on('msg', (msg) => {
+                    let 템플릿
+                    if (msg.user == '<%=userID%>') {
+                        console.log('내꺼')
+                        템플릿 = `
                     <div class="chatMessage">
                         <div class="my-profile-image">
                             ${msg.user}
@@ -103,9 +129,9 @@
                         </div>
                         <div style="clear: both;"></div>
                     </div>`;
-                } else {
-                    console.log('남의꺼')
-                    템플릿 = `
+                    } else {
+                        console.log('남의꺼')
+                        템플릿 = `
                     <div class="chatMessage">
                         <div class="other-profile-image">
                             ${msg.user}
@@ -115,146 +141,146 @@
                         </div> 
                         <div style="clear: both;"></div>
                     </div>`;
-                }
-                let chatContainer = document.querySelector('.chat-container');
-                chatContainer.insertAdjacentHTML('beforeend', 템플릿)
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            })
+                    }
+                    let chatContainer = document.querySelector('.chat-container');
+                    chatContainer.insertAdjacentHTML('beforeend', 템플릿)
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                })
 
-            socket.on('delete-message', (data) => {
-                console.log(data)
-                document.querySelectorAll('.chatMessage')[0].remove()
-                if (data.user == '<%=userID%>') {
-                    console.log('내꺼 삭제')
-                } else {
-                    console.log('너꺼 삭제')
-                }
-            })
+                socket.on('delete-message', (data) => {
+                    console.log(data)
+                    document.querySelectorAll('.chatMessage')[0].remove()
+                    if (data.user == '<%=userID%>') {
+                        console.log('내꺼 삭제')
+                    } else {
+                        console.log('너꺼 삭제')
+                    }
+                })
 
-            socket.on('room-size', (data) => {
-                let 템플릿 = `접속자${data}명`
-                document.querySelector('.peopleNum').innerHTML = 템플릿
-            })
+                socket.on('room-size', (data) => {
+                    let 템플릿 = `접속자${data}명`
+                    document.querySelector('.peopleNum').innerHTML = 템플릿
+                })
 
-            // 페이지이동 감지
-            window.addEventListener('beforeunload', function (event) {
-                socket.emit('leave-page', '<%= room._id %>')
-                // 페이지를 떠날 때 서버로 이동 감지 요청을 보냄
-                fetch('/page-leave?roomID=<%=room._id%>&userID=<%=userID%>', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
+                // 페이지이동 감지
+                window.addEventListener('beforeunload', function (event) {
+                    socket.emit('leave-page', '<%= room._id %>')
+                    // 페이지를 떠날 때 서버로 이동 감지 요청을 보냄
+                    fetch('/page-leave?roomID=<%=room._id%>&userID=<%=userID%>', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
                 });
 
-            });
 
+                let 눌렀나 = false;
+                let 시작좌표 = 0;
+                let 변화량 = 0;
+                let 투명도 = 0;
 
-            let 눌렀나 = false;
-            let 시작좌표 = 0;
-            let 변화량 = 0;
-            let 투명도 = 0;
+                const chatMessages = document.querySelector(".chat-messages");
+                const 컨테이너 = $('.chat-container')
+                // 드래그 핸들링 이벤트 설정
+                컨테이너.on("mousedown", function (event) {
+                    눌렀나 = true;
+                    시작좌표 = event.clientX;
+                    // console.log(시작좌표)
+                });
 
-            const chatMessages = document.querySelector(".chat-messages");
-            const 컨테이너 = $('.chat-container')
-            // 드래그 핸들링 이벤트 설정
-            컨테이너.on("mousedown", function (event) {
-                눌렀나 = true;
-                시작좌표 = event.clientX;
-                // console.log(시작좌표)
-            });
+                컨테이너.on("mousemove", function (event) {
 
-            컨테이너.on("mousemove", function (event) {
+                    if (눌렀나) {
+                        컨테이너.css('transition', 'none')
+                        변화량 = 시작좌표 - event.clientX;
 
-                if (눌렀나) {
-                    컨테이너.css('transition', 'none')
-                    변화량 = 시작좌표 - event.clientX;
+                        if (변화량 < 300 && 변화량 > -300) {
+                            투명도 = -(1 / 180000) * 변화량 * 변화량 + 1;
+                            console.log(투명도);
+                            // console.log(변화량)
+                            컨테이너.css('transform', `translateX(${-변화량}px)`)
+                                .css('opacity', 투명도);
+                        }
+                    }
+                });
 
-                    if (변화량 < 300 && 변화량 > -300) {
-                        투명도 = -(1 / 180000) * 변화량 * 변화량 + 1;
-                        console.log(투명도);
+                컨테이너.on("mouseup", function (event) {
+                    if (눌렀나) {
+                        // 변화량 = 시작좌표 - event.clientX;
                         // console.log(변화량)
-                        컨테이너.css('transform', `translateX(${-변화량}px)`)
-                            .css('opacity', 투명도);
+
+                        if (변화량 > 200) {
+                            console.log('오른쪽으로 이동')
+                            alert('오른쪽 이동')
+                            moveRoom();
+                        } else if (변화량 < -200) {
+                            console.log('왼쪽으로 이동')
+                            alert('왼쪽 이동')
+                            moveRoom();
+                        } else {
+                            console.log('별로 이동안함')
+                            컨테이너.css('transform', `translateX(0px)`).css('transition', 'all 0.5s')
+                        }
+
+                        눌렀나 = false;
+                        시작좌표 = 0;
+                        변화량 = 0;
                     }
+                });
+
+                function moveRoom() {
+                    console.log('이동')
+                    document.getElementById('next-form').submit();
                 }
-            });
 
-            컨테이너.on("mouseup", function (event) {
-                if (눌렀나) {
-                    // 변화량 = 시작좌표 - event.clientX;
-                    // console.log(변화량)
+                // 모바일
+                컨테이너.on("touchstart", function (e) {
+                    눌렀나 = true;
+                    시작좌표 = e.touches[0].clientX;
+                });
 
-                    if (변화량 > 200) {
-                        console.log('오른쪽으로 이동')
-                        alert('오른쪽 이동')
-                        moveRoom();
-                    } else if (변화량 < -200) {
-                        console.log('왼쪽으로 이동')
-                        alert('왼쪽 이동')
-                        moveRoom();
-                    } else {
-                        console.log('별로 이동안함')
-                        컨테이너.css('transform', `translateX(0px)`).css('transition', 'all 0.5s')
+                컨테이너.on("touchmove", function (e) {
+
+                    if (눌렀나) {
+                        컨테이너.css('transition', 'none')
+                        변화량 = 시작좌표 - e.touches[0].clientX;
+
+                        if (변화량 < 300 && 변화량 > -300) {
+                            투명도 = -(1 / 180000) * 변화량 * 변화량 + 1;
+                            console.log(투명도);
+                            // console.log(변화량)
+                            컨테이너.css('transform', `translateX(${-변화량}px)`)
+                                .css('opacity', 투명도);
+                        }
                     }
+                });
 
-                    눌렀나 = false;
-                    시작좌표 = 0;
-                    변화량 = 0;
-                }
-            });
-
-            function moveRoom() {
-                console.log('이동')
-                document.getElementById('next-form').submit();
-            }
-
-            // 모바일
-            컨테이너.on("touchstart", function (e) {
-                눌렀나 = true;
-                시작좌표 = e.touches[0].clientX;
-            });
-
-            컨테이너.on("touchmove", function (e) {
-
-                if (눌렀나) {
-                    컨테이너.css('transition', 'none')
-                    변화량 = 시작좌표 - e.touches[0].clientX;
-
-                    if (변화량 < 300 && 변화량 > -300) {
-                        투명도 = -(1 / 180000) * 변화량 * 변화량 + 1;
-                        console.log(투명도);
+                컨테이너.on("touchend", function (e) {
+                    if (눌렀나) {
+                        // 변화량 = 시작좌표 - event.clientX;
                         // console.log(변화량)
-                        컨테이너.css('transform', `translateX(${-변화량}px)`)
-                            .css('opacity', 투명도);
+
+                        if (변화량 > 200) {
+                            console.log('오른쪽으로 이동')
+                            alert('오른쪽 이동')
+                            moveRoom();
+                        } else if (변화량 < -200) {
+                            console.log('왼쪽으로 이동')
+                            alert('왼쪽 이동')
+                            moveRoom();
+                        } else {
+                            console.log('별로 이동안함')
+                            컨테이너.css('transform', `translateX(0px)`).css('transition', 'all 0.5s')
+                        }
+
+                        눌렀나 = false;
+                        시작좌표 = 0;
+                        변화량 = 0;
                     }
-                }
+                });
             });
 
-            컨테이너.on("touchend", function (e) {
-                if (눌렀나) {
-                    // 변화량 = 시작좌표 - event.clientX;
-                    // console.log(변화량)
-
-                    if (변화량 > 200) {
-                        console.log('오른쪽으로 이동')
-                        alert('오른쪽 이동')
-                        moveRoom();
-                    } else if (변화량 < -200) {
-                        console.log('왼쪽으로 이동')
-                        alert('왼쪽 이동')
-                        moveRoom();
-                    } else {
-                        console.log('별로 이동안함')
-                        컨테이너.css('transform', `translateX(0px)`).css('transition', 'all 0.5s')
-                    }
-
-                    눌렀나 = false;
-                    시작좌표 = 0;
-                    변화량 = 0;
-                }
-            });
-        });
-
-    </script>
+        </script>
 </body>
 
 </html>
